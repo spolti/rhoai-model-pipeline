@@ -1,0 +1,44 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: caikit-e2e-inference-pipeline-run-
+spec:
+  pipelineRef:
+    name: caikit-e2e-inference-pipeline
+  params:
+    - name: GIT_URL
+      value: 'https://github.com/spolti/rhoai-model-pipeline.git'
+    - name: GIT_REVISION
+      value: main
+    - name: OCP_CLUSTER_API_ENDPOINT
+      value: 'test'
+    - name: OCP_TOKEN
+      value: sha256~
+    - name: MINIO_USER
+      value: test
+    - name: MINIO_PASSWORD
+      value: test
+    - name: MINIO_ENDPOINT
+      value: test
+    - name: WORKING_NAMESPACE
+      value: pipeline-test
+    - name: PYTHON_IMAGE
+      value: 'registry.redhat.io/ubi9/python-39:latest'
+    - name: OC_IMAGE
+      value: 'image-registry.openshift-image-registry.svc:5000/openshift/cli:latest'
+    - name: ISVC_DEPLOYMENT_VERBOSE
+      value: 'true'
+  serviceAccountName: pipeline
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        metadata:
+          labels:
+            pipeline: caikit-pipeline-test
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 500Mi
+
