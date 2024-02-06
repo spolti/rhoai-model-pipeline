@@ -50,7 +50,7 @@ def deploy_isvc(protocol, namespace, verbose):
     kserve = KServeClient()
     kserve.create(isvc, namespace=namespace, watch=True, timeout_seconds=120)
 
-    response_json = kserve.get(name=name, timeout_seconds=120, namespace=namespace, watch=False)
+    response_json = kserve.get(name=name, timeout_seconds=240, namespace=namespace, watch=False)
     endpoint = response_json.get('status', {}).get('components', {}).get('predictor', {}).get('url', None)
 
     if endpoint is not None:
@@ -58,7 +58,7 @@ def deploy_isvc(protocol, namespace, verbose):
             f.write(f"endpoint-{protocol}={endpoint}\n")
         return endpoint
     else:
-        raise ValueError("Failed to deploy the isvc - not able to find the endpoint, check the response: " + endpoint)
+        raise ValueError("Failed to deploy the isvc - not able to find the endpoint, check the response: " + response_json)
 
 
 if __name__ == "__main__":

@@ -69,30 +69,25 @@ spec:
           value: $(params.GIT_REVISION)
       runAfter:
         - clean-namespace-begin
-#TODO create task to deploy the storage-config secret with the S3 info.
-#    - name: deploy-minio-storage-config
-#      params:
-#        - name: MINIO_USER
-#          value: $(params.MINIO_USER)
-#        - name: MINIO_PASSWORD
-#          value: $(params.MINIO_PASSWORD)
-#        - name: MINIO_ENDPOINT
-#          value: $(params.MINIO_ENDPOINT)
-#        - name: PYTHON_IMAGE
-#          value: $(params.PYTHON_IMAGE)
-#        - name: CLUSTER_API_ENDPOINT
-#          value: $(params.OCP_CLUSTER_API_ENDPOINT)
-#        - name: TOKEN
-#          value: $(params.OCP_TOKEN)
-#      taskRef:
-#        kind: Task
-#        name: deploy-caikit-runtime-task
-#      runAfter:
-#        - fetch-repository
-#      workspaces:
-#        - name: source
-#          workspace: shared-workspace
-############## above, undone
+
+    - name: deploy-minio-storage-config
+      params:
+        - name: MINIO_USER
+          value: $(params.MINIO_USER)
+        - name: MINIO_PASSWORD
+          value: $(params.MINIO_PASSWORD)
+        - name: MINIO_ENDPOINT
+          value: $(params.MINIO_ENDPOINT)
+        - name: OC_IMAGE
+          value: $(params.OC_IMAGE)
+        - name: WORKING_NAMESPACE
+          value: $(params.WORKING_NAMESPACE)
+      taskRef:
+        kind: Task
+        name: deploy-storage-config-task
+      runAfter:
+        - clean-namespace-begin
+
     - name: deploy-caikit-runtime-http
       params:
         - name: PROTOCOL
@@ -108,6 +103,7 @@ spec:
         name: deploy-caikit-runtime-task
       runAfter:
         - fetch-repository
+        - deploy-minio-storage-config
       workspaces:
         - name: source
           workspace: shared-workspace
@@ -126,6 +122,7 @@ spec:
         name: deploy-caikit-runtime-task
       runAfter:
         - fetch-repository
+        - deploy-minio-storage-config
       workspaces:
         - name: source
           workspace: shared-workspace
@@ -189,8 +186,6 @@ spec:
       workspaces:
         - name: source
           workspace: shared-workspace
-
-
     - name: infer-model-http
       params:
         - name: PROTOCOL
@@ -219,7 +214,6 @@ spec:
       workspaces:
         - name: source
           workspace: shared-workspace
-
     - name: clean-namespace-end
       description: Make sure there is no previous deployment related to this pipeline
       params:
@@ -233,5 +227,4 @@ spec:
       runAfter:
         - infer-model-http
         - infer-model-grpc
-
-# TODO finally, print the results model invocation
+# TODO print the results model invocation

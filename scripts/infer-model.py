@@ -50,7 +50,8 @@ if __name__ == "__main__":
             # gets only the endpoint without the protocol
             endpoint = configs.get("endpoint-" + protocol).data.split("//")[-1]
             if protocol != 'grpc' and protocol.startswith('http'):
-                protocol = endpoint.split(":")[0]
+                # override the protocol if the endpoint is already defining it
+                protocol = configs.get("endpoint-" + protocol).data.split(":")[0]
 
     else:
         if args.protocol == 'grpc' and args.port is None:

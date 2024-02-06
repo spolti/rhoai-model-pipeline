@@ -13,10 +13,10 @@ spec:
     - name: WORKING_NAMESPACE
       type: string
   steps:
-    - name: deploy-it
+    - name: clean
       image: $(params.OC_IMAGE)
       script: |
         # delete runtimes
         # add the storage-config secret for minio credentials
-        oc delete InferenceService,ServingRuntime,PersistentVolumeClaims --selector=pipeline=caikit-pipeline-test -n $(params.WORKING_NAMESPACE) --wait=true --timeout=60s
+        oc delete InferenceService,ServingRuntime,Secrets --selector=pipeline=caikit-pipeline-test -n $(params.WORKING_NAMESPACE) --wait=true --timeout=60s --ignore-not-found
       resources: {}

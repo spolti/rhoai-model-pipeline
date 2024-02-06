@@ -8,22 +8,50 @@ serve as the storage for the models.
 This pipeline will execute the following steps in the same order as described:
 
 - Clean the given namespace by deleting all the resources that might be created by a previous execution and left behind.
-- 
+- Create the Storage Config secret with the Minio information.
+- Pull the git repository that contains the needed files.
+- Deploy the CaiKit Runtime:
+  - http
+  - grpc
+- Check if the CaiKit Runtime is ready to be used.
+- Deploy the Inference Service with the default model: `flan-t5-small-caikit`
+- Infer the model with the 'Translate to German:  My name is Arthur' text.
+  - Infer using the `caikit-nlp-client` with the `http` and `grpc` protocols
+- Clean the current namespace
 
 
 ## Running it:
 
-Fill the required fields on the pipeline-run.yaml file and then run the following command:
+Deploy the pipeline and its tasks:
 
 ```bash
-oc create -f pipeline-run.yaml
+for yaml in `find pipelines -name "*.yaml"`; do 
+    oc apply -f $yaml; 
+done
+```
+
+
+Fill the required parameters in the command below file and then run the following command:
+
+```bash
+tkn pipeline start caikit-e2e-inference-pipeline  \
+  --param OCP_CLUSTER_API_ENDPOINT=https://ocp-endpoint.test.com:6443 \
+  --param OCP_TOKEN=sha256~mytoken \
+  --param WORKING_NAMESPACE=pipeline-test \
+  --param MINIO_USER=admin \
+  --param MINIO_PASSWORD=password \
+  --param MINIO_ENDPOINT=minio.pipeline-test.svc:9000 \
+  -w name=shared-workspace,volumeClaimTemplateFile=pvc.yaml \
+  --use-param-defaults --showlog
 ```
 
 It will trigger the Pipeline.
+
+Other option is to trigger the pipeline from OpenShift Web Console.
+
 
 
 ### TODOs
 
 - [ ] Create a base python image with the required dependencies as part of the pipeline
 - [ ] Parameterize the deploy-isvc step timeout, default is 120s.
-- [ ] Create the given namespace if it does not exist

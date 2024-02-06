@@ -21,10 +21,8 @@ spec:
       image: $(params.PYTHON_IMAGE)
       script: |
         cd $(workspaces.source.path)/scripts
-        echo "#########"
-        cat output-envs.properties
-        echo "#########"
         pip install -r requirements-infer.txt
+        echo "########################################################################"
         echo "executing python infer-model.py -p $(params.PROTOCOL)"
         # the endpoint parameter should be provided by configuration file from previous task (deploy-isvc)
         python infer-model.py -p $(params.PROTOCOL)
